@@ -25,4 +25,24 @@
         :title))
     (catch Exception e nil)))
 
-
+(defmulti handle 
+  "returns the correct handle dictionary {:pageids <someid>} or 
+  {:titles sometitle} depending on the handle type of the url"
+  handle-type)
+(defmethod handle :id [url]
+ (assoc {} 
+        :pageids 
+        (-> url
+            java.net.URL.
+            .getQuery
+            (string/split #"=")
+            second)))
+(defmethod handle :title [url]
+  (let [parsed (java.net.URL. url)
+        path (.getPath parsed)]
+    (assoc {}
+           :titles
+           (-> path
+               (string/split #"/")
+               last))))
+(defmethod handle nil [url] nil)

@@ -29,3 +29,14 @@
     (testing "erroneous url entry"
       (is (nil? (handle-type "htd;/lol.orgzzz")))))))
 
+(deftest handle-test
+  (testing "must return the handle dictionary of the given mediawiki url."
+    (testing "id handle"
+      (is (= {:pageids "1111"}
+             (handle "http://en.wikipedia.org/wiki/index.php?curid=1111"))))
+    (testing "title handle"
+      (is (= {:titles "Montreal"}
+             (handle "http://en.wikipedia.org/wiki/Montreal"))))
+    (testing "invalid handle type"
+      (is (nil? (handle "htp[:/loll.com"))))))
+
