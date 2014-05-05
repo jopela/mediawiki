@@ -1,18 +1,20 @@
 (ns mediawiki.requests)
 
+
+
 (defn geocoords
-  "returns the geocoordinates of a page. Returns nil if the page has
-  no coordinates."
-  [page]
-  (let [params {}]
-  [45 -73])
+  "returns the list of geocoordinates of the pages. Put nil in the collection
+  if the page has no coordinates."
+  [pages]
+  [[45 -73] [45 2.35]])
 
 (defn language-links
   "returns all the language links of a given mediawiki page (including the
   language of the queried wiki). Languages of the pages can be inferred by the 
   url." 
-  [page]
-  ["http://en.wikipedia.org/Montreal" "http://fr.wikipedia.org/Montreal"])
+  [pages]
+  [["http://en.wikipedia.org/Montreal" "http://fr.wikipedia.org/Montreal"]
+   ["http://en.wikipedia.org/Paris" "http://fr.wikipedia.org/Paris"]])
 
 (defn image-links
   "returns all the images url of a given page."
