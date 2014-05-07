@@ -96,23 +96,6 @@
   [query-continue]
   (into {} (vals query-continue)))
 
-;(defn serial-mediawiki-req
-;  "Performs a group requests, looping until all required content is
-;  returned by the API endpoint."
-;  [endpoint query-params]
-;  (loop [query {} 
-;         result (:body (client/get endpoint 
-;                                   {:as :json-string-keys 
-;                                    :query-params query-params}))]
-;    (if-let [query-continue (result "query-continue")]
-;      (let [new-query-params (merge query-params 
-;                                    (contiue-handles query-continue))
-;            new-result (client/get endpoint {:as :json-string-keys 
-;                                             :query-params new-query-params})]
-;        (recur (utils/nested-merge query
-;                                   (result "query")) new-result))
-;      (merge query result))))
-
 (defn serial-mediawiki-req
   "Performs a requests to the mediawiki API, issuing continue requests and
   merging back the result if required."

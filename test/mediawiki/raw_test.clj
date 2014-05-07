@@ -44,19 +44,31 @@
              (continue-handle {:langlinks {:llcontinue "999|con"
                                             :imcontinue "998|con"}}))))))
 
-(def en-wikipedia-city-test ["http://en.wikipedia.org/w/api.php"
-                             {:format "json"
-                              :action "query"
-                              :prop "langlinks"
-                              :lllimit 10
-                              :llprop "url"
-                              :titles "Montreal"}])
+(def en-wikipedia-city-test-con ["http://en.wikipedia.org/w/api.php"
+                                 {:format "json"
+                                  :action "query"
+                                  :prop "langlinks"
+                                  :lllimit 10
+                                  :llprop "url"
+                                  :titles "Montreal"}])
+(def en-wikipedia-city-test-nocon ["http://en.wikipedia.org/w/api.php"
+                                   {:format "json"
+                                    :action "query"
+                                    :prop "langlinks"
+                                    :lllimit 500
+                                    :llprop "url"
+                                    :titles "Montreal"}])
 (def en-wikipedia-city-expected 
   (load-json-test "./test/mediawiki/wiki-test/en-wikipedia-city-result.json"))
 (deftest serial-mediawiki-req-test
   (testing "Must return all the content pertaining to the group from the
            mediawiki API."
-    (is (= en-wikipedia-city-expected
-           (apply serial-mediawiki-req en-wikipedia-city-test)))))
-
+    (testing "with continue requests."
+      (is (= en-wikipedia-city-expected
+             (apply serial-mediawiki-req en-wikipedia-city-test-con))))
+    (testing "with no continue requests."
+      (is (= en-wikipedia-city-expected
+             (apply serial-mediawiki-req 
+                    en-wikipedia-city-test-nocon))))))
+      
 
