@@ -110,19 +110,37 @@
                                          (continue-handle continue))))
         (utils/nested-merge query-result (select-keys req-body [:query]))))))
 
+(defn rand-access-title
+  "Performs a transformation on the result map so that random access
+  by title handle is restored."
+  [result-map]
+  (let [pages (get-in result-map [:query :pages])
+        new-pages (into {} (for [[page-id {:keys [title] :as item}] pages]
+                             {title item}))]
+    (assoc-in result-map [:query :pages] new-pages)))
+
 (defn mediawiki-group-request
   "Performs an API request for this group of url and returns a map with url as
   keys and result as values. The function require the sequence of url that
   make the group (group-coll), a mapping of the parameters (specific-params) 
   that are specific to the query to make (prop=coordinates, etc, limits etc)
-  and finally, a function (extractro-fn) that will be called on pages to 
+  and finally, a function (extractro-fn) that will be called on pages item to 
   extract the results. This function should take a value keyed by id and 
   return the corresponding result."
   [group-coll specific-params extract-fn]
-  (if-let [handles (reduce merge (r/map utils/handle group-coll))]
+  (if-let [handles (url-handle group-coll)]
     (let [endpoint (-> group-coll first utils/endpoint-url)
           api-params {:action "query" :format "json"}
           query-params (merge handles api-params specific-params)
-          ]
-      nil)))
-
+          handle-t (-> group-coll first utils/handle-type)
+          raw-result (serial-mediawiki-req endpoint query-params)
+          look-up-rand-access (get-in (if (= :id handle-t) 
+                                        raw-result
+                                        (rand-access-title raw-result))
+                                        [:query :pages])]
+      (into {} (for [u group-coll
+                     :let [h (-> u utils/handle vals first)
+                           res (look-up-rand-access h)]
+                     :when (not= res nil)] {u (extract-fn res)})))
+    {}))
+      

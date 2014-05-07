@@ -71,4 +71,65 @@
              (apply serial-mediawiki-req 
                     en-wikipedia-city-test-nocon))))))
       
+(def rand-access-api-res-test {:query {:pages {:1 {:pageid 1
+                                                   :title "Montreal"
+                                                   :prop {:value "1"}}
+                                               :2 {:pageid 2
+                                                   :title "Paris"
+                                                   :prop {:value "2"}}}}})
+(def rand-access-api-res-ex {:query {:pages {"Montreal" {:pageid 1
+                                                         :title "Montreal"
+                                                         :prop {:value "1"}}
+                                             "Paris"{:pageid 2
+                                                     :title "Paris"
+                                                     :prop {:value "2"}}}}})
+
+(deftest rand-access-title-test
+  (testing "Must return a randomly accessible (by title) result map."
+    (is (= rand-access-api-res-ex
+           (rand-access-title rand-access-api-res-test)))))
+
+(defn extract-coordinate-test
+  [{:keys [coordinates]}]
+  (let [primary (first (filter :primary coordinates))]
+    [(:lat primary) (:lon primary)]))
+
+(def specific-params-test {:format "json" 
+                           :action "query"
+                           :prop "coordinates"
+                           :colimit 10}) ; Think there is a bug in the mediawiki API
+                                        ; that causes an incomplete result set to be 
+                                        ; generated when colimit==1. Setting it to 10 for tests.
+(def coll-valid-title-test ["http://en.wikipedia.org/wiki/Montreal"
+                            "http://en.wikipedia.org/wiki/Paris"
+                            "http://en.wikipedia.org/wiki/Toronto"
+                            "http://en.wikipedia.org/wiki/Quebec"
+                            "http://en.wikipedia.org/wiki/Sherbrooke"])
+(def coll-valid-title-ex {"http://en.wikipedia.org/wiki/Montreal" [45.5 -73.5667]
+                          "http://en.wikipedia.org/wiki/Paris" [48.8567 2.3508]
+                          "http://en.wikipedia.org/wiki/Toronto" [43.7 -79.4]
+                          "http://en.wikipedia.org/wiki/Quebec" [53 -70]
+                          "http://en.wikipedia.org/wiki/Sherbrooke" [45.4 -71.9]})
+(def coll-valid-id-test ["http://en.wikipedia.org/wiki/index.php?curid=7954681"
+                         "http://en.wikipedia.org/wiki/index.php?curid=22989"
+                         "http://en.wikipedia.org/wiki/index.php?curid=7954867"
+                         "http://en.wikipedia.org/wiki/index.php?curid=64646"])
+(def coll-valid-id-ex {"http://en.wikipedia.org/wiki/index.php?curid=7954681" [45.5 -73.5667]
+                       "http://en.wikipedia.org/wiki/index.php?curid=22989" [48.8567 2.3508]
+                       "http://en.wikipedia.org/wiki/index.php?curid=7954867" [53 -70]
+                       "http://en.wikipedia.org/wiki/index.php?curid=64646" [43.7 -79.4]})
+
+(deftest mediawiki-group-request-test
+  (testing "Must return the result of a group request."
+    (testing "title handle group."
+      (is (= coll-valid-title-ex
+             (mediawiki-group-request coll-valid-title-test
+                                      specific-params-test
+                                      extract-coordinate-test))))
+    (testing "id handle group."
+      (is (= coll-valid-id-ex
+             (mediawiki-group-request coll-valid-id-test
+                                      specific-params-test
+                                      extract-coordinate-test))))))
+
 
