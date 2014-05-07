@@ -83,7 +83,7 @@
   "http://ru.wikipedia.org/wiki/index.php?curid=1113"])
 
 (defn url-handle
-  "returns a dictionary containing the proper url handle for the url group
+  "Returns a dictionary containing the proper url handle for the url group
   collection. A handle is used to specify to the API wich page we need 
   information from."
   [coll]
@@ -93,24 +93,36 @@
 
 
 (defn serial-group-requests
-  "performs a group requests, looping until all required content is
+  "Performs a group requests, looping until all required content is
   returned by the API endpoint."
   [endpoint query-params]
   {"query" "lolololll"})
+
+(defn random-access-title
+  "Returns a map that allows random access to results based on title."
+  [query-map]
+  nil)
+
+
+(defn random-access-map
+  "Returns a map that allows random access by handle type."
+  [handle-type result-map]
+  nil)
   
 (defn mediawiki-group-request
-  "performs an API request for this group of url and returns a map with url as
+  "Performs an API request for this group of url and returns a map with url as
   keys and result as values. The function require the sequence of url that
   make the group (group-coll), a mapping of the parameters (specific-params) 
   that are specific to the query to make (prop=coordinates, etc, limits etc)
   and finally, a function (extractro-fn) that will be called on pages to 
   extract the results. This function should take a value keyed by id and 
   return the corresponding result."
-  [url-coll specific-params extract-fn]
-  (if-let [handles (reduce merge (r/map utils/handle url-coll))]
-    (let [endpoint (-> url-coll first utils/endpoint-url)
+  [group-coll specific-params extract-fn]
+  (if-let [handles (reduce merge (r/map utils/handle group-coll))]
+    (let [endpoint (-> group-coll first utils/endpoint-url)
           api-params {:action "query" :format "json"}
           query-params (merge handles api-params specific-params)
-          raw-result (serial-group-requests endpoint query-params)]
+          raw-result (serial-group-requests endpoint query-params)
+          ]
       nil)))
 

@@ -1,7 +1,15 @@
 (ns mediawiki.utils-test
   (:require [clojure.test :refer :all]
-            [mediawiki.utils :refer :all]))
+            [mediawiki.utils :refer :all]
+            [cheshire.core :refer :all]))
 
+; test helper function.
+(defn load-json-test
+  [filename]
+  (-> filename
+      slurp
+      parse-string))
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (deftest endpoint-url-tests
   (testing "must return the endpoint where info about the gien page can be
            obtained."
@@ -39,4 +47,22 @@
              (handle "http://en.wikipedia.org/wiki/Montreal"))))
     (testing "invalid handle type"
       (is (nil? (handle "htp[:/loll.com"))))))
+
+(def mediawiki-value1 (load-json-test "./test/mediawiki/wiki-test/mediawiki-response1.json"))
+(def mediawiki-value2 (load-json-test "./test/mediawiki/wiki-test/mediawiki-response2.json"))
+(def mediawiki-merged (load-json-test "./test/mediawiki/wiki-test/mediawiki-merged.json"))
+(deftest nested-merge-test
+  (testing "must return a merged with the nesting function recursively
+           applied."
+    (testing "1 level deep nested map with sequentials as values."
+      (is (= {:a {:b [1 2 3 4 5 6]}}
+             (nested-merge {:a {:b [1 2 3]}} {:a {:b [4 5 6]}}))))
+    (testing "1 level deep nested map with strings as values."
+      (is (= {:a {:b "last"}} (nested-merge {:a {:b "first"}}
+                                            {:a {:b "second"}}
+                                            {:a {:b "last"}}))))
+    (testing "real mediawiki return values."
+      (is (= mediawiki-merged
+             (nested-merge mediawiki-value1
+                           mediawiki-value2))))))
 

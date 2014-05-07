@@ -46,3 +46,12 @@
                (string/split #"/")
                last))))
 (defmethod handle nil [url] nil)
+
+(defn nested-merge
+  "Functions to merge nested map. If the values to merge are sequences,
+  use (into left right)."
+  [& values]
+  (cond
+    (every? map? values) (apply merge-with nested-merge values)
+    (every? sequential? values) (reduce #(into %1 %2) [] values)
+    :else (last values)))
