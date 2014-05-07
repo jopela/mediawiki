@@ -91,24 +91,42 @@
         reduce-fn (comp (r/remove nil?) (r/map utils/handle))]
     (reduce merge-with-fn (reduce-fn coll))))
 
+(defn continue-handle
+  "compute the parameters for conitnueation from the query-continue map"
+  [query-continue]
+  (into {} (vals query-continue)))
 
-(defn serial-group-requests
-  "Performs a group requests, looping until all required content is
-  returned by the API endpoint."
+;(defn serial-mediawiki-req
+;  "Performs a group requests, looping until all required content is
+;  returned by the API endpoint."
+;  [endpoint query-params]
+;  (loop [query {} 
+;         result (:body (client/get endpoint 
+;                                   {:as :json-string-keys 
+;                                    :query-params query-params}))]
+;    (if-let [query-continue (result "query-continue")]
+;      (let [new-query-params (merge query-params 
+;                                    (contiue-handles query-continue))
+;            new-result (client/get endpoint {:as :json-string-keys 
+;                                             :query-params new-query-params})]
+;        (recur (utils/nested-merge query
+;                                   (result "query")) new-result))
+;      (merge query result))))
+
+(defn serial-mediawiki-req
+  "Performs a requests to the mediawiki API, issuing continue requests and
+  merging back the result if required."
   [endpoint query-params]
-  {"query" "lolololll"})
+  (letfn [(http-get [e q] (:body (client/get e {:as :json
+                                                :query-params q})))]
+    (loop [query-result {} req-body (http-get endpoint query-params)]
+      (if-let [continue (req-body :query-continue)]
+        (recur (utils/nested-merge query-result
+                                  (select-keys req-body [:query]))
+               (http-get endpoint (merge query-params 
+                                         (continue-handle continue))))
+        (utils/nested-merge query-result (select-keys req-body [:query]))))))
 
-(defn random-access-title
-  "Returns a map that allows random access to results based on title."
-  [query-map]
-  nil)
-
-
-(defn random-access-map
-  "Returns a map that allows random access by handle type."
-  [handle-type result-map]
-  nil)
-  
 (defn mediawiki-group-request
   "Performs an API request for this group of url and returns a map with url as
   keys and result as values. The function require the sequence of url that
@@ -122,7 +140,6 @@
     (let [endpoint (-> group-coll first utils/endpoint-url)
           api-params {:action "query" :format "json"}
           query-params (merge handles api-params specific-params)
-          raw-result (serial-group-requests endpoint query-params)
           ]
       nil)))
 
