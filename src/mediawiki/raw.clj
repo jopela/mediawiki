@@ -100,24 +100,25 @@
   "Performs a requests to the mediawiki API, issuing continue requests and
   merging back the result if required."
   [endpoint query-params]
-  (letfn [(http-get [e q] (:body (client/get e {:as :json
+  (letfn [(http-get [e q] (:body (client/get e {:as :json-string-keys
                                                 :query-params q})))]
     (loop [query-result {} req-body (http-get endpoint query-params)]
-      (if-let [continue (req-body :query-continue)]
+      (if-let [continue (req-body "query-continue")]
         (recur (utils/nested-merge query-result
-                                  (select-keys req-body [:query]))
+                                  (select-keys req-body ["query"]))
                (http-get endpoint (merge query-params 
                                          (continue-handle continue))))
-        (utils/nested-merge query-result (select-keys req-body [:query]))))))
+        (utils/nested-merge query-result (select-keys req-body ["query"]))))))
+
 
 (defn rand-access-title
   "Performs a transformation on the result map so that random access
   by title handle is restored."
   [result-map]
-  (let [pages (get-in result-map [:query :pages])
-        new-pages (into {} (for [[page-id {:keys [title] :as item}] pages]
+  (let [pages (get-in result-map ["query" "pages"])
+        new-pages (into {} (for [[page-id {title "title" :as item}] pages]
                              {title item}))]
-    (assoc-in result-map [:query :pages] new-pages)))
+    (assoc-in result-map ["query" "pages"] new-pages)))
 
 (defn mediawiki-group-request
   "Performs an API request for this group of url and returns a map with url as
@@ -137,10 +138,10 @@
           look-up-rand-access (get-in (if (= :id handle-t) 
                                         raw-result
                                         (rand-access-title raw-result))
-                                        [:query :pages])]
+                                        ["query" "pages"])]
       (into {} (for [u group-coll
                      :let [h (-> u utils/handle vals first)
                            res (look-up-rand-access h)]
                      :when (not= res nil)] {u (extract-fn res)})))
-    {}))
+     {}))
       

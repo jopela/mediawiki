@@ -8,7 +8,7 @@
   [filename]
   (-> filename
       slurp
-      (parse-string true)))
+      (parse-string)))
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (deftest url-handle-test
   (testing "must return the handle (pageids or titles) for the collection of
@@ -71,18 +71,18 @@
              (apply serial-mediawiki-req 
                     en-wikipedia-city-test-nocon))))))
       
-(def rand-access-api-res-test {:query {:pages {:1 {:pageid 1
-                                                   :title "Montreal"
-                                                   :prop {:value "1"}}
-                                               :2 {:pageid 2
-                                                   :title "Paris"
-                                                   :prop {:value "2"}}}}})
-(def rand-access-api-res-ex {:query {:pages {"Montreal" {:pageid 1
-                                                         :title "Montreal"
-                                                         :prop {:value "1"}}
-                                             "Paris"{:pageid 2
-                                                     :title "Paris"
-                                                     :prop {:value "2"}}}}})
+(def rand-access-api-res-test {"query"{"pages" {"1" {"pageid" 1
+                                                   "title""Montreal"
+                                                   "prop" {"value" "1"}}
+                                               "2" {"pageid" 2
+                                                   "title" "Paris"
+                                                   "prop" {"value" "2"}}}}})
+(def rand-access-api-res-ex {"query" {"pages" {"Montreal" {"pageid" 1
+                                                         "title" "Montreal"
+                                                         "prop" {"value" "1"}}
+                                             "Paris" {"pageid" 2
+                                                     "title""Paris"
+                                                     "prop" {"value" "2"}}}}})
 
 (deftest rand-access-title-test
   (testing "Must return a randomly accessible (by title) result map."
@@ -90,26 +90,27 @@
            (rand-access-title rand-access-api-res-test)))))
 
 (defn extract-coordinate-test
-  [{:keys [coordinates]}]
-  (let [primary (first (filter :primary coordinates))]
-    [(:lat primary) (:lon primary)]))
+  [{coordinates "coordinates"}]
+  (let [primary (first coordinates)]
+    [(primary "lat") (primary "lon")]))
 
 (def specific-params-test {:format "json" 
                            :action "query"
                            :prop "coordinates"
+                           :coprimary "primary"
                            :colimit 10}) ; Think there is a bug in the mediawiki API
-                                        ; that causes an incomplete result set to be 
-                                        ; generated when colimit==1. Setting it to 10 for tests.
+                                         ; that causes an incomplete result set to be 
+                                         ; generated when colimit==1. Setting it to 10 for tests.
 (def coll-valid-title-test ["http://en.wikipedia.org/wiki/Montreal"
                             "http://en.wikipedia.org/wiki/Paris"
                             "http://en.wikipedia.org/wiki/Toronto"
                             "http://en.wikipedia.org/wiki/Quebec"
-                            "http://en.wikipedia.org/wiki/Sherbrooke"])
+                            ])
 (def coll-valid-title-ex {"http://en.wikipedia.org/wiki/Montreal" [45.5 -73.5667]
                           "http://en.wikipedia.org/wiki/Paris" [48.8567 2.3508]
                           "http://en.wikipedia.org/wiki/Toronto" [43.7 -79.4]
                           "http://en.wikipedia.org/wiki/Quebec" [53 -70]
-                          "http://en.wikipedia.org/wiki/Sherbrooke" [45.4 -71.9]})
+                          })
 (def coll-valid-id-test ["http://en.wikipedia.org/wiki/index.php?curid=7954681"
                          "http://en.wikipedia.org/wiki/index.php?curid=22989"
                          "http://en.wikipedia.org/wiki/index.php?curid=7954867"
