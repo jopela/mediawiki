@@ -56,3 +56,9 @@
     (every? map? values) (apply merge-with nested-merge values)
     (every? sequential? values) (reduce #(into %1 %2) [] values)
     :else (last values)))
+
+(defmacro benchmark
+  "returns the time taken, in seconds, to execute the given expression."
+  [expression]
+  `(let [start (java.lang.System)]))
+
