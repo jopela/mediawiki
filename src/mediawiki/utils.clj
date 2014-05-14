@@ -44,7 +44,8 @@
            :titles
            (-> path
                (string/split #"/")
-               last))))
+               last
+               (java.net.URLDecoder/decode "UTF-8")))))
 (defmethod handle nil [url] nil)
 
 (defn nested-merge

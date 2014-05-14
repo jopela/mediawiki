@@ -128,7 +128,7 @@
   and finally, a function (extractro-fn) that will be called on pages item to 
   extract the results. This function should take a value keyed by id and 
   return the corresponding result."
-  [group-coll specific-params extract-fn]
+  [specific-params extract-fn group-coll]
   (if-let [handles (url-handle group-coll)]
     (let [endpoint (-> group-coll first utils/endpoint-url)
           api-params {:action "query" :format "json"}
@@ -144,4 +144,27 @@
                            res (look-up-rand-access h)]
                      :when (not= res nil)] {u (extract-fn res)})))
      {}))
+
+(defn mediawiki-request
+  "Performs a specific request for a collection of url to the mediawiki(s) API(s).
+  Requests are routed to the right endpoint based on the the url."
+  [query-param extract-fn fold-partition-param group-size coll]
+  (let [endpoint-group (into [] (vals (group-by utils/endpoint-url coll)))
+        groups (reduce into [] (r/map (partial partition-all group-size) endpoint-group))
+        req-fn (partial mediawiki-group-request query-param extract-fn)
+        ; will perform the requests using map-reduce.
+        responses (r/fold fold-partition-param merge merge (r/map req-fn groups))]
+    (into [] (r/map responses coll))))
+
+(def t ["http://en.wikipedia.org/wiki/Montreal" "http://en.wikipedia.org/wiki/Paris"
+        "http://fr.wikipedia.org/wiki/Montreal" "http://fr.wikipedia.org/wiki/Paris"])
+
+
+
+
+
+
+
+
+
       

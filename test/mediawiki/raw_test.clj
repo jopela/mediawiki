@@ -124,13 +124,34 @@
   (testing "Must return the result of a group request."
     (testing "title handle group."
       (is (= coll-valid-title-ex
-             (mediawiki-group-request coll-valid-title-test
-                                      specific-params-test
-                                      extract-coordinate-test))))
+             (mediawiki-group-request specific-params-test
+                                      extract-coordinate-test
+                                      coll-valid-title-test))))
     (testing "id handle group."
       (is (= coll-valid-id-ex
-             (mediawiki-group-request coll-valid-id-test
-                                      specific-params-test
-                                      extract-coordinate-test))))))
+             (mediawiki-group-request specific-params-test
+                                      extract-coordinate-test
+                                      coll-valid-id-test))))))
 
+(def coll-mediawiki-request-test ["http://en.wikipedia.org/wiki/Montreal" 
+                                  "http://en.wikipedia.org/wiki/Paris"
+                                  "http://en.wikipedia.org/wiki/Toronto" "http://en.wikipedia.org/wiki/Quebec"
+                                  "http://en.wikipedia.org/wiki/Sherbrooke" 
+                                  "http://ru.wikipedia.org/wiki/%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0"
+                              ])
+(def coll-mediawiki-request-expected [[45.5 -73.5667] 
+                                      [48.8567 2.3508] 
+                                      [43.7 -79.4] 
+                                      [53 -70] 
+                                      [45.4 -71.9] 
+                                      [55.7517 37.6178]])
 
+(def fold-partition-param-test 2)
+(def group-size-test 1)
+(deftest mediawiki-request-test
+  (testing "Must return, in order, the result of the mediawiki API query for each url in coll."
+    (is (= coll-mediawiki-request-expected (mediawiki-request specific-params-test
+                                                              extract-coordinate-test
+                                                              fold-partition-param-test
+                                                              group-size-test
+                                                              coll-mediawiki-request-test)))))

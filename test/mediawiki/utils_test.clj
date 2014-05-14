@@ -30,12 +30,18 @@
            url."
     (testing "id type"
       (is (= :id 
-             (handle-type "http://en.wikipedia.org/index.php?curid=8918")))
+             (handle-type "http://en.wikipedia.org/index.php?curid=8918"))))
+
     (testing "title type"
       (is (= :title
              (handle-type "http://en.wikipedia.org/wiki/Montreal"))))
+
+    (testing "encoded url"
+      (is (= :title
+             (handle-type "http://ru.wikipedia.org/wiki/%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0"))))
+
     (testing "erroneous url entry"
-      (is (nil? (handle-type "htd;/lol.orgzzz")))))))
+      (is (nil? (handle-type "htd;/lol.orgzzz"))))))
 
 (deftest handle-test
   (testing "must return the handle dictionary of the given mediawiki url."
@@ -45,6 +51,9 @@
     (testing "title handle"
       (is (= {:titles "Montreal"}
              (handle "http://en.wikipedia.org/wiki/Montreal"))))
+    (testing "encoded url"
+      (is (= {:titles "Москва"}
+             (handle "http://ru.wikipedia.org/wiki/%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0"))))
     (testing "invalid handle type"
       (is (nil? (handle "htp[:/loll.com"))))))
 
