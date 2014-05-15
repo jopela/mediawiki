@@ -53,12 +53,31 @@
   "returns the introductory text of a page (abstract). The text format is
   html."
   [pages]
-  ["<p><b>Montreal is a great city</b></p>"])
+  (letfn [(extract-fn [x] (x "extract"))]
+    (let [params {:prop "extracts"
+                  :exlimit 20
+                  :exintro "True"}
+          fold-partition-param 4
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn article-html
   "returns the article of the page in html format."
   [pages]
-  ["<h2>History</h2><p> The history of Montreal is fun</p>"])
+  (letfn [(extract-fn [x] (x "extract"))]
+    (let [params {:prop "extracts"
+                  :exlimit 1}
+          fold-partition-param 2
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn depiction
   "returns the url of the image that acts as the depiction of the page"
