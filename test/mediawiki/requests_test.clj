@@ -55,16 +55,15 @@
                                 "http://it.wikipedia.org/wiki/Qu%C3%A9bec_(provincia)"
                                 "http://ru.wikipedia.org/wiki/%D0%A1%D0%B5%D0%BD%D1%82-%D0%94%D0%B6%D0%BE%D0%BD_(%D0%9D%D1%8C%D1%8E-%D0%91%D1%80%D0%B0%D0%BD%D1%81%D1%83%D0%B8%D0%BA)"
                                 "http://en.wikipedia.org/wiki/Humid_continental_climate"])
-(def language-links-test-subset-expected #{"http://en.wikipedia.org/wiki/Paris" 
+(def language-links-test-subset-expected ["http://en.wikipedia.org/wiki/Paris" 
                                            "http://fr.wikipedia.org/wiki/Montr%C3%A9al" 
                                            "http://ka.wikipedia.org/wiki/%E1%83%99%E1%83%94%E1%83%98%E1%83%9E%E1%83%A2%E1%83%90%E1%83%A3%E1%83%9C%E1%83%98" 
                                            "http://lmo.wikipedia.org/wiki/Qu%C3%A9bec_(pruinsa_e_nasi%C3%B9)"
-                                           "http://zh.wikipedia.org/wiki/%E5%9C%A3%E7%BA%A6%E7%BF%B0_(%E6%96%B0%E4%B8%8D%E4%BC%A6%E7%91%9E%E5%85%8BA)"
-                                           "http://ko.wikipedia.org/wiki/%EC%8A%B5%EC%9C%A4_%EB%8C%80%EB%A5%99%EC%84%B1_%EA%B8%B0%ED%9B%84"})
+                                           "http://zh.wikipedia.org/wiki/%E5%9C%A3%E7%BA%A6%E7%BF%B0_(%E6%96%B0%E4%B8%8D%E4%BC%A6%E7%91%9E%E5%85%8B)"
+                                           "http://ko.wikipedia.org/wiki/%EC%8A%B5%EC%9C%A4_%EB%8C%80%EB%A5%99%EC%84%B1_%EA%B8%B0%ED%9B%84"])
 (def language-links-test-invalid ["htp./asddasd.cccc23k2k2"])
 
-(language-links [
-                                "http://it.wikipedia.org/wiki/Qu%C3%A9bec_(provincia)"])
+(language-links ["http://en.wikipedia.org/wiki/Humid_continental_climate"])
 
 (deftest language-links-test
   (testing "Must return the list of language links associated with the 
@@ -74,7 +73,7 @@
                        language-links
                        flatten
                        (into #{}))]
-        (is (every? language-links-test-subset-expected links))))
+        (is (every? links language-links-test-subset-expected))))
     (testing "invalid url"
       (is (= [nil] (language-links language-links-test-invalid))))))
 
