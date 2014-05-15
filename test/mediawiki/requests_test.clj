@@ -43,11 +43,11 @@
     (testing "invalid urls"
       (is (= geocoords-invalid-url-test-expected (geocoords geocoords-invalid-url-test-expected))))
     (testing "speed test, small coll"
-      (is (< (utils/benchmark (geocoords geocoords-10-urls)) 0.5)))
+      (is (< (utils/benchmark (geocoords geocoords-10-urls)) 0.225)))
     (testing "speed test, medium coll"
-      (is (< (utils/benchmark (geocoords geocoords-100-urls)) 1.2)))
+      (is (< (utils/benchmark (geocoords geocoords-100-urls)) 0.5)))
     (testing "speed test, large coll"
-      (is (< (utils/benchmark (geocoords geocoords-725-urls)) 5)))))
+      (is (< (utils/benchmark (geocoords geocoords-725-urls)) 1.0)))))
 
 (geocoords geocoords-725-urls)
     
