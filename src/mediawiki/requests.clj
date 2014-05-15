@@ -1,6 +1,7 @@
 (ns mediawiki.requests
   (:require [mediawiki.utils :as utils]
-            [mediawiki.raw :as raw]))
+            [mediawiki.raw :as raw]
+            [clojure.core.reducers :as r]))
 
 (defn geocoords
   "returns the list of geocoordinates of the pages. Put nil in the collection
@@ -14,7 +15,7 @@
     (let [params {:prop "coordinates"
                   :colimit 500
                   :coprimary "primary"}
-          fold-partition-param 4
+          fold-partition-param 2
           group-size 50]
       (raw/mediawiki-request params
                              extract-fn
@@ -23,12 +24,24 @@
                              pages))))
 
 (defn language-links
-  "returns all the language links of a given mediawiki page (including the
-  language of the queried wiki). Languages of the pages can be inferred by the 
+  "returns all the language links of a given mediawiki page Languages of the 
+  pages can be inferred by the 
   url." 
   [pages]
-  [["http://en.wikipedia.org/Montreal" "http://fr.wikipedia.org/Montreal"]
-   ["http://en.wikipedia.org/Paris" "http://fr.wikipedia.org/Paris"]])
+  (letfn [(extract-fn [x]
+            (if-let [langlinks (x "langlinks")]
+              (into [] (r/map #(%1 "url") langlinks))
+              nil))]
+    (let [params {:prop "langlinks"
+                  :lllimit 500
+                  :llprop "url"}
+          fold-partition-param 4
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn image-links
   "returns all the images url of a given page."
