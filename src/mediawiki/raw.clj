@@ -156,15 +156,3 @@
         responses (r/fold fold-partition-param merge merge (r/map req-fn groups))]
     (into [] (r/map responses coll))))
 
-(def t ["http://en.wikipedia.org/wiki/Montreal" "http://en.wikipedia.org/wiki/Paris"
-        "http://fr.wikipedia.org/wiki/Montreal" "http://fr.wikipedia.org/wiki/Paris"])
-
-
-
-
-
-
-
-
-
-      

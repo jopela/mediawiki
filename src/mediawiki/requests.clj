@@ -1,11 +1,26 @@
 (ns mediawiki.requests
-  (:require [mediawiki.utils :as utils]))
+  (:require [mediawiki.utils :as utils]
+            [mediawiki.raw :as raw]))
 
 (defn geocoords
   "returns the list of geocoordinates of the pages. Put nil in the collection
   if the page has no coordinates."
   [pages]
-  [[45 -73] [45 2.35]])
+  (letfn [(extract-fn [x]
+           (if-let [coords (x "coordinates")]
+            (let [{lat "lat" lon "lon"} (first coords )]
+              [lat lon])
+            nil))]
+    (let [params {:prop "coordinates"
+                  :colimit 500
+                  :coprimary "primary"}
+          fold-partition-param 4
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn language-links
   "returns all the language links of a given mediawiki page (including the

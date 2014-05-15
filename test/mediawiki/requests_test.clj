@@ -1,8 +1,8 @@
 (ns mediawiki.requests-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
-            [mediawiki.requests :refer :all]))
-
+            [mediawiki.requests :refer :all]
+            [mediawiki.utils :as utils]))
 
 (defn load-url
   "helper function to load url list from file."
@@ -41,5 +41,13 @@
     (testing "urls with no coordinates"
       (is (= geocoords-title-url-no-coord-test-expected (geocoords geocoords-title-url-no-coord-test))))
     (testing "invalid urls"
-      (is (= geocoords-invalid-url-test-expected (geocoords geocoords-invalid-url-test-expected))))))
+      (is (= geocoords-invalid-url-test-expected (geocoords geocoords-invalid-url-test-expected))))
+    (testing "speed test, small coll"
+      (is (< (utils/benchmark (geocoords geocoords-10-urls)) 0.5)))
+    (testing "speed test, medium coll"
+      (is (< (utils/benchmark (geocoords geocoords-100-urls)) 1.2)))
+    (testing "speed test, large coll"
+      (is (< (utils/benchmark (geocoords geocoords-725-urls)) 5)))))
+
+(geocoords geocoords-725-urls)
     

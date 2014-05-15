@@ -60,5 +60,11 @@
 (defmacro benchmark
   "returns the time taken, in seconds, to execute the given expression."
   [expression]
-  `(let [start (java.lang.System)]))
+  `(let [start# (java.lang.System/currentTimeMillis)
+         res# ~expression
+         end# (java.lang.System/currentTimeMillis)]
+     (->  end#
+         (-  start#)
+         (/ 1000.0))))
+
 
