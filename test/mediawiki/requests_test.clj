@@ -63,6 +63,9 @@
                                            "http://ko.wikipedia.org/wiki/%EC%8A%B5%EC%9C%A4_%EB%8C%80%EB%A5%99%EC%84%B1_%EA%B8%B0%ED%9B%84"})
 (def language-links-test-invalid ["htp./asddasd.cccc23k2k2"])
 
+(language-links [
+                                "http://it.wikipedia.org/wiki/Qu%C3%A9bec_(provincia)"])
+
 (deftest language-links-test
   (testing "Must return the list of language links associated with the 
            given wiki url."

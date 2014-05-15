@@ -1,6 +1,11 @@
 (ns mediawiki.utils
   (:require [clojure.string :as string]))
 
+(defn cap-first
+  "capitalize the first letter of a string only"
+  [x]
+  (str (string/capitalize (first x)) (subs x 1 (count x))))
+
 (defn endpoint-url
   "returns the endpoint that should be queried given url"
   [page]
@@ -9,6 +14,13 @@
           host (.getHost url)]
       (format "http://%s/w/api.php" host))
     (catch Exception e nil)))
+
+(defn normalize-title
+  "Apply normalization rules to a given title"
+  [title]
+  (-> title
+      cap-first
+      (string/replace #"_" " ")))
 
 (defn handle-type
   "returns the 'handle' type (:id or :title) of the given url. Will return
@@ -45,7 +57,8 @@
            (-> path
                (string/split #"/")
                last
-               (java.net.URLDecoder/decode "UTF-8")))))
+               (java.net.URLDecoder/decode "UTF-8")
+               normalize-title))))
 (defmethod handle nil [url] nil)
 
 (defn nested-merge

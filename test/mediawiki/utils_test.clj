@@ -55,8 +55,11 @@
       (is (= {:titles "Москва"}
              (handle "http://ru.wikipedia.org/wiki/%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0"))))
     (testing "invalid handle type"
-      (is (nil? (handle "htp[:/loll.com"))))))
-
+      (is (nil? (handle "htp[:/loll.com"))))
+    (testing "title handle that must be normalized"
+      (is (= {:titles "Québec (provincia)"}
+             (handle "http://it.wikipedia.org/wiki/Qu%C3%A9bec_(provincia)"))))))
+    
 (def mediawiki-value1 (load-json-test "./test/mediawiki/wiki-test/mediawiki-response1.json"))
 (def mediawiki-value2 (load-json-test "./test/mediawiki/wiki-test/mediawiki-response2.json"))
 (def mediawiki-merged (load-json-test "./test/mediawiki/wiki-test/mediawiki-merged.json"))
@@ -75,4 +78,21 @@
              (nested-merge mediawiki-value1
                            mediawiki-value2))))))
 
+(deftest cap-first-test
+  (testing "Must return the same string with the first letter capitalised."
+    (testing "lowercase input"
+      (is (= "Aaaa" (cap-first "aaaa"))))
+    (testing "Multiple words"
+      (is (= "Aaaa Montreal" (cap-first "aaaa Montreal"))))
+    (testing "Already cap-first"
+      (is (= "Aaaa" (cap-first "Aaaa"))))))
+
+(deftest normalize-title-test
+  (testing "Must return new title with normalization rules applied."
+    (testing "lowercase first letter title"
+      (is (= "Montreal" (normalize-title "montreal"))))
+    (testing "underscore in title"
+      (is (= "Super Montreal City" (normalize-title "Super_Montreal_City"))))
+    (testing "lowercase+underscore"
+      (is (= "Super montreal city" (normalize-title "super_montreal_city")))))) 
 
