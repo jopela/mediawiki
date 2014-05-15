@@ -77,7 +77,14 @@
     (testing "invalid url"
       (is (= [nil] (language-links language-links-test-invalid))))))
 
-;(deftest image-links-test
-;  (testing "Must return all the images url of a given page."
-;    (testing 
+(def introduction-html-test-pages ["http://en.wikipedia.org/wiki/Paris"
+                                   "http://en.wikipedia.org/wiki/Montreal"
+                                   "http://en.wikipedia.org/Toronto"])
+(def introduction-html-test-pages-sentences-expected #{})
+(def introduction-html-test-invalid ["http://google.com"])
+(deftest introduction-html-test
+  (testing "Must return the introduction of the given pages in html"
+    (testing "valid url"
+      (is (= 1 0)))))
+
 
