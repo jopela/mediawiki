@@ -1,7 +1,8 @@
 (ns mediawiki.requests
   (:require [mediawiki.utils :as utils]
             [mediawiki.raw :as raw]
-            [clojure.core.reducers :as r]))
+            [clojure.core.reducers :as r]
+            [mediawiki.requests-util :as requests-utils]))
 
 (defn geocoords
   "returns the list of geocoordinates of the pages. Put nil in the collection
@@ -79,11 +80,28 @@
                              group-size
                              pages))))
 
+
+(defn extract-fn-imageinfo 
+  "returns the url of the most recent picture found in the image info list."
+  [imageinfo]
+  nil)
+
 (defn depiction
   "return the url of the image that acts as the depiction of the page"
   [pages]
-  nil)
-
+  (letfn [(extract-fn-pageimage [x] (x "pageimage"))
+          
+          ]
+    (let [params {:prop "pageimages"
+                  :piprop "name"
+                  :pilimit 500}
+          fold-partition-param 2
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn-pageimage
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn categories
   "return the categories to which the given page belongs."
@@ -140,8 +158,6 @@
                              group-size
                              pages))))
 
-(inter-wiki-links ["http://en.wikipedia.org/wiki/Montreal"])
-
 (defn all-properties
   "returns a seq of documents containing: geocoords, language-links imege-links
   introduction-html, article-html, depiction, categories, external-links
@@ -156,6 +172,3 @@
     :categories ["cat1" "cat2"]
     :external-links ["http://extern.com"]
     :inter-wiki-links ["http://wiki1.com" "http://wiki2.com"]}])
-
-
-
