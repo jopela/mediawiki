@@ -1,8 +1,8 @@
 (ns mediawiki.requests
   (:require [mediawiki.utils :as utils]
             [mediawiki.raw :as raw]
-            [clojure.core.reducers :as r]
-            [mediawiki.requests-util :as requests-utils]))
+            [mediawiki.requests-utils :as requests-utils]
+            [clojure.core.reducers :as r]))
 
 (defn geocoords
   "returns the list of geocoordinates of the pages. Put nil in the collection
@@ -80,28 +80,31 @@
                              group-size
                              pages))))
 
-
-(defn extract-fn-imageinfo 
-  "returns the url of the most recent picture found in the image info list."
-  [imageinfo]
-  nil)
-
 (defn depiction
   "return the url of the image that acts as the depiction of the page"
   [pages]
-  (letfn [(extract-fn-pageimage [x] (x "pageimage"))
-          
-          ]
-    (let [params {:prop "pageimages"
-                  :piprop "name"
-                  :pilimit 500}
+  (letfn [(extract-fn-pageimages [x] (x "pageimage"))]
+    (let [param-pageimages {:prop "pageimages"
+                           :piprop "name"
+                           :pilimit 50}
           fold-partition-param 2
-          group-size 50]
-      (raw/mediawiki-request params
-                             extract-fn-pageimage
-                             fold-partition-param
-                             group-size
-                             pages))))
+          group-size-pageimages 50
+          param-imageinfo {:prop "imageinfo"
+                           :iilimit 500
+                           :iiprop "timestamp|url"}
+          group-size-imageinfo 50]
+      (let [files (raw/mediawiki-request param-pageimages
+                                         extract-fn-pageimages
+                                         fold-partition-param
+                                         group-size-pageimages
+                                         pages)
+            pages-files (map vector pages files)
+            files-urls (into [] (r/map #(apply requests-utils/file-title-url %) pages-files))]
+        (raw/mediawiki-request param-imageinfo
+                               requests-utils/extract-fn-imageinfo
+                               fold-partition-param
+                               group-size-imageinfo
+                               files-urls)))))
 
 (defn categories
   "return the categories to which the given page belongs."
@@ -172,3 +175,6 @@
     :categories ["cat1" "cat2"]
     :external-links ["http://extern.com"]
     :inter-wiki-links ["http://wiki1.com" "http://wiki2.com"]}])
+
+
+
