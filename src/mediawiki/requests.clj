@@ -2,6 +2,7 @@
   (:require [mediawiki.utils :as utils]
             [mediawiki.raw :as raw]
             [mediawiki.requests-utils :as requests-utils]
+            [clojure.string :as string]
             [clojure.core.reducers :as r]))
 
 (defn geocoords
@@ -36,7 +37,7 @@
     (let [params {:prop "langlinks"
                   :lllimit 500
                   :llprop "url"}
-          fold-partition-param 4
+          fold-partition-param 2
           group-size 50]
       (raw/mediawiki-request params
                              extract-fn
@@ -47,8 +48,34 @@
 (defn image-links
   "returns all the images url of a given page."
   [pages]
-  [["http://en.wikipedia.org/photo/omg.jpg"] 
-   ["http://en.wikipedia.org/p/ok.jpg"]])
+  (letfn [(extract-fn-images [x] 
+            (if-let [images (x "images")]
+              (into [] (r/map (fn [x] (-> "title" x (string/replace #"File:" ""))) images))
+              nil))]
+    (let [params-images {:prop "images"
+                         :imlimit 500}
+          params-imageinfo {:prop "imageinfo"
+                            :iiprop "timestamp|url"
+                            :iilimit 500}
+          fold-partition-param 2
+          group-size 50
+          img-fn (partial raw/mediawiki-request 
+                          params-imageinfo
+                          requests-utils/extract-fn-imageinfo
+                          fold-partition-param
+                          group-size)]
+      (let [files (raw/mediawiki-request params-images
+                                         extract-fn-images
+                                         fold-partition-param
+                                         group-size
+                                         pages)
+            pages-files (map vector pages files)
+            files-urls (doall (for [[url coll] pages-files] (into [] 
+                                                           (r/map (partial requests-utils/file-title-url url) coll))))]
+
+        (r/fold 1 requests-utils/fold-combine requests-utils/fold-reduce (r/map img-fn files-urls))))))
+
+(utils/benchmark (image-links (for [t ["montreal" "sherbrooke" "chicago" "paris" "boston" "rome" "moscow" "rio" "berlin"]] (format "http://en.wikipedia.org/wiki/%s" t))))
 
 (defn introduction-html
   "returns the introductory text of a page (abstract). The text format is
@@ -58,7 +85,7 @@
     (let [params {:prop "extracts"
                   :exlimit 20
                   :exintro "True"}
-          fold-partition-param 4
+          fold-partition-param 2
           group-size 50]
       (raw/mediawiki-request params
                              extract-fn
@@ -175,6 +202,3 @@
     :categories ["cat1" "cat2"]
     :external-links ["http://extern.com"]
     :inter-wiki-links ["http://wiki1.com" "http://wiki2.com"]}])
-
-
-

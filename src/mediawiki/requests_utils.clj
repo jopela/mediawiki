@@ -19,3 +19,13 @@
       (format "http://%s/wiki/File:%s" host file))
     (catch Exception e nil)))
 
+(defn fold-reduce
+  "reduce function used to 'fold into'"
+  ([x y]
+   (conj x y)))
+
+(defn fold-combine
+  "combine function used to 'fold-into'"
+  ([] [])
+  ([x y]
+    (into x y)))
