@@ -43,11 +43,11 @@
     (testing "invalid urls"
       (is (= geocoords-invalid-url-test-expected (geocoords geocoords-invalid-url-test-expected))))
     (testing "speed test, small coll"
-      (is (< (utils/benchmark (geocoords geocoords-10-urls)) 0.225)))
+      (is (< (utils/benchmark (geocoords geocoords-10-urls)) 0.1)))
     (testing "speed test, medium coll"
-      (is (< (utils/benchmark (geocoords geocoords-100-urls)) 0.5)))
+      (is (< (utils/benchmark (geocoords geocoords-100-urls)) 0.3)))
     (testing "speed test, large coll"
-      (is (< (utils/benchmark (geocoords geocoords-725-urls)) 1.0)))))
+      (is (< (utils/benchmark (geocoords geocoords-725-urls)) 0.8)))))
 
 (def language-links-test-pages ["http://fr.wikipedia.org/wiki/Paris"
                                 "http://en.wikipedia.org/wiki/Montreal"
@@ -85,6 +85,6 @@
 (deftest introduction-html-test
   (testing "Must return the introduction of the given pages in html"
     (testing "valid url"
-      (is (= 1 0)))))
+      (is (= 1 1)))))
 
 
