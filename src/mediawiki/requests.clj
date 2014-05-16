@@ -80,20 +80,46 @@
                              pages))))
 
 (defn depiction
-  "returns the url of the image that acts as the depiction of the page"
+  "return the url of the image that acts as the depiction of the page"
   [pages]
-  ["http://en.wikipedia.org/wiki/picture.jpeg"])
+  nil)
+
 
 (defn categories
   "return the categories to which the given page belongs."
   [pages]
-  [(into #{} ["Populated places in 1642" "Montreal"])])
+  (letfn [(extract-fn [x]
+            (if-let [categories (x "categories")]
+              (into [] (r/map #(%1 "title") categories))
+              nil))]
+    (let [params {:prop "categories"
+                  :cllimit 500}
+          fold-partition-param 2
+          group-size 50]
+      (raw/mediawiki-request params 
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn external-links
   "return the external urls from the given page. For inter-wiki links,
   used the inter-wiki-links function."
   [pages]
-  [(into #{} ["http://stm.info" "http://meteo-montreal.com"])])
+  (letfn [(extract-fn [x]
+            (if-let [extlinks (x "extlinks")]
+              (into [] (r/map #(%1 "*") extlinks))
+              nil))]
+    (let [params {:prop "extlinks"
+                  :ellimit 500
+                  :elexpandurl "True"}
+          fold-partition-param 2
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
 
 (defn inter-wiki-links
   "return url links to other wiki's (wikivoyage, wikibooks etc) for the given
