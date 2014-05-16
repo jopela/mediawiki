@@ -125,8 +125,22 @@
   "return url links to other wiki's (wikivoyage, wikibooks etc) for the given
   page."
   [pages]
-  [(into #{} ["http://en.wikivoyage.org/wiki/Montreal" 
-             "http://en.wikibooks.org/wiki/Montreal"])])
+  (letfn [(extract-fn [x] 
+            (if-let [iwlinks (x "iwlinks")]
+              (into [] (r/map #(%1 "url") iwlinks))
+              nil))]
+    (let [params {:prop "iwlinks"
+                  :iwurl "True"
+                  :iwlimit 500}
+          fold-partition-param 2
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
+
+(inter-wiki-links ["http://en.wikipedia.org/wiki/Montreal"])
 
 (defn all-properties
   "returns a seq of documents containing: geocoords, language-links imege-links
