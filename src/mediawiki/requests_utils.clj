@@ -1,6 +1,32 @@
 (ns mediawiki.requests-utils
   (:require [clj-time.coerce :as c]
-            [clojure.core.reducers :as r]))
+            [clojure.core.reducers :as r]
+            [mediawiki.raw :as raw]))
+
+
+(defn simple-extract-request
+  "template function for inter-wiki-links,external-links,categories"
+  [k1 k2 params pages]
+  (letfn [(extract-fn [x]
+            (if-let [extracts (x k1)]
+              (into [] (r/map #(%1 k2) extracts))
+              nil))]
+    (let [fold-partition-param 2
+          group-size 50]
+      (raw/mediawiki-request params
+                             extract-fn
+                             fold-partition-param
+                             group-size
+                             pages))))
+
+
+(def t-params {:prop "categories"
+               :cllimit 500})
+
+(def k1 "categories")
+(def k2 "title")
+
+
 
 (defn extract-fn-imageinfo
   "returns the url of the most recent item in image info."

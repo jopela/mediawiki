@@ -50,7 +50,10 @@
   [pages]
   (letfn [(extract-fn-images [x] 
             (if-let [images (x "images")]
-              (into [] (r/map (fn [x] (-> "title" x (string/replace #"File:" ""))) images))
+              (into [] (r/map (fn [x] 
+                                (-> "title" 
+                                    x 
+                                    (string/replace #"File:" ""))) images))
               nil))]
     (let [params-images {:prop "images"
                          :imlimit 500}
@@ -74,8 +77,6 @@
                                                            (r/map (partial requests-utils/file-title-url url) coll))))]
 
         (r/fold 1 requests-utils/fold-combine requests-utils/fold-reduce (r/map img-fn files-urls))))))
-
-(utils/benchmark (image-links (for [t ["montreal" "sherbrooke" "chicago" "paris" "boston" "rome" "moscow" "rio" "berlin"]] (format "http://en.wikipedia.org/wiki/%s" t))))
 
 (defn introduction-html
   "returns the introductory text of a page (abstract). The text format is
