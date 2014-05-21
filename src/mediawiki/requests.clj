@@ -134,22 +134,11 @@
                                group-size-imageinfo
                                files-urls)))))
 
-(defn categories
-  "return the categories to which the given page belongs."
-  [pages]
-  (letfn [(extract-fn [x]
-            (if-let [categories (x "categories")]
-              (into [] (r/map #(%1 "title") categories))
-              nil))]
-    (let [params {:prop "categories"
-                  :cllimit 500}
-          fold-partition-param 2
-          group-size 50]
-      (raw/mediawiki-request params 
-                             extract-fn
-                             fold-partition-param
-                             group-size
-                             pages))))
+(def categories (partial requests-utils/simple-extract-request 
+                         "categories" 
+                         "title" 
+                         {:prop "categories" 
+                          :cllimit 500}))
 
 (defn external-links
   "return the external urls from the given page. For inter-wiki links,

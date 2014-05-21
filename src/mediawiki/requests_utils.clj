@@ -19,15 +19,6 @@
                              group-size
                              pages))))
 
-
-(def t-params {:prop "categories"
-               :cllimit 500})
-
-(def k1 "categories")
-(def k2 "title")
-
-
-
 (defn extract-fn-imageinfo
   "returns the url of the most recent item in image info."
   [x]
