@@ -1,7 +1,8 @@
 (ns mediawiki.raw-test
   (:require [clojure.test :refer :all]
             [mediawiki.raw :refer :all]
-            [cheshire.core :refer :all]))
+            [cheshire.core :refer :all]
+            [clojure.core.reducers :as r]))
 
 ; test helper function.
 (defn load-json-test
@@ -44,6 +45,7 @@
              (continue-handle {:langlinks {:llcontinue "999|con"
                                             :imcontinue "998|con"}}))))))
 
+; with continue.
 (def en-wikipedia-city-test-con ["http://en.wikipedia.org/w/api.php"
                                  {:format "json"
                                   :action "query"
@@ -51,6 +53,7 @@
                                   :lllimit 10
                                   :llprop "url"
                                   :titles "Montreal"}])
+; with no continue.
 (def en-wikipedia-city-test-nocon ["http://en.wikipedia.org/w/api.php"
                                    {:format "json"
                                     :action "query"
@@ -58,18 +61,32 @@
                                     :lllimit 500
                                     :llprop "url"
                                     :titles "Montreal"}])
-(def en-wikipedia-city-expected 
-  (load-json-test "./test/mediawiki/wiki-test/en-wikipedia-city-result.json"))
+(def en-wikipedia-city-subset-expected ["http://de.wikipedia.org/wiki/Montreal" 
+                                        "http://es.wikipedia.org/wiki/Montreal"
+                                        "http://fr.wikipedia.org/wiki/Montr%C3%A9al"
+                                        "http://it.wikipedia.org/wiki/Montr%C3%A9al"
+                                        "http://pt.wikipedia.org/wiki/Montreal"])
+(defn extract-urls-test 
+  [x]
+  (if-let [results (get-in x ["query" "pages"])]
+    (letfn [(extract-fn [y]
+              (if-let [langlinks (y "langlinks")]
+                (into [] (r/map #(% "url") langlinks))
+                nil))]
+      (into [] (r/map extract-fn (vals results))))
+    nil))
+
 (deftest serial-mediawiki-req-test
   (testing "Must return all the content pertaining to the group from the
-           mediawiki API."
-    (testing "with continue requests."
-      (is (= en-wikipedia-city-expected
-             (apply serial-mediawiki-req en-wikipedia-city-test-con))))
-    (testing "with no continue requests."
-      (is (= en-wikipedia-city-expected
-             (apply serial-mediawiki-req 
-                    en-wikipedia-city-test-nocon))))))
+           mediawiki API"
+    (testing "with continue requests"
+      (let [[mtl-urls] (extract-urls-test (apply serial-mediawiki-req en-wikipedia-city-test-con))
+            mtl-urls-set (into #{} mtl-urls)]
+        (is (every? mtl-urls-set en-wikipedia-city-subset-expected))))
+    (testing "no continue requests"
+      (let [[mtl-urls] (extract-urls-test (apply serial-mediawiki-req en-wikipedia-city-test-nocon))
+            mtl-urls-set (into #{} mtl-urls)]
+        (is (every? mtl-urls-set en-wikipedia-city-subset-expected))))))
       
 (def rand-access-api-res-test {"query"{"pages" {"1" {"pageid" 1
                                                    "title""Montreal"
